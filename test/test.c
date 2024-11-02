@@ -1,7 +1,11 @@
 #include <kind.h>
-#include <stdio.h>
 
 int main(void) {
-  printf("Hello world!");
+  kind_server_config_t server_config;
+  server_config.port = 3000;
+  server_config.logging_type = colorful;
+
+  listen_server(&server_config);
+
   return 0;
 }
