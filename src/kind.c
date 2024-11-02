@@ -21,6 +21,9 @@ void interrupt_handler(int signal);
 int setup_server_socket(kind_server_config_t *server_config,
                         struct sockaddr *address, socklen_t address_size);
 
+// TODO: Make this multithread with a thread pool
+// TODO: Make this thread safe
+// TODO: Make well unit testing for this
 void listen_server(kind_server_config_t *server_config) {
   // Setup signal action
   // If the kyeboard interrupts the program, instead of just close the program,
@@ -51,13 +54,13 @@ void listen_server(kind_server_config_t *server_config) {
   case no:
     break;
   case basic:
-    printf("Server running in port: %d\n", server_config->port);
+    (void)printf("Server running in port: %d\n", server_config->port);
     break;
   case colorful:
-    printf(ANSI_COLOR_MAGENTA "[Server]: ");
-    printf(ANSI_COLOR_GREEN "Running at port ");
-    printf(ANSI_COLOR_BLUE "%d\n", server_config->port);
-    printf(ANSI_COLOR_RESET);
+    (void)printf(ANSI_COLOR_MAGENTA "[Server]: ");
+    (void)printf(ANSI_COLOR_GREEN "Running at port ");
+    (void)printf(ANSI_COLOR_BLUE "%d\n", server_config->port);
+    (void)printf(ANSI_COLOR_RESET);
     break;
   }
 
@@ -75,6 +78,7 @@ void listen_server(kind_server_config_t *server_config) {
     (void)close(client_file_descriptor);
   }
 
+  // Close client and server socket
   (void)close(server_file_descriptor);
   if (-2 != client_file_descriptor)
     (void)close(client_file_descriptor);
