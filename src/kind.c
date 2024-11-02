@@ -18,6 +18,8 @@
 static volatile bool is_running = true;
 
 void interrupt_handler(int signal);
+int setup_server_socket(kind_server_config_t *server_config,
+                        struct sockaddr *address, socklen_t address_size);
 
 void listen_server(kind_server_config_t *server_config) {
   // Setup signal action
@@ -34,13 +36,6 @@ void listen_server(kind_server_config_t *server_config) {
     return;
   }
 
-  // Create the server TCP socket
-  int server_file_descriptor = socket(AF_INET, SOCK_STREAM, 0);
-  if (-1 == server_file_descriptor) {
-    (void)perror("Error creating the server socket");
-    return;
-  }
-
   // Setup server address
   struct sockaddr_in address;
   address.sin_family = AF_INET;                  // Setup TCP address
@@ -48,20 +43,10 @@ void listen_server(kind_server_config_t *server_config) {
   address.sin_addr.s_addr = INADDR_ANY;          // Set address to 0.0.0.0
   socklen_t address_size = sizeof(address);
 
-  if (-1 ==
-      bind(server_file_descriptor, (struct sockaddr *)&address, address_size)) {
-    (void)perror("Error binding the address to the server");
-    (void)close(server_file_descriptor);
-    return;
-  }
+  int server_file_descriptor = setup_server_socket(
+      server_config, (struct sockaddr *)&address, address_size);
 
-  if (-1 == listen(server_file_descriptor, server_config->backlog)) {
-    (void)perror("Error initializing the server listener");
-    (void)close(server_file_descriptor);
-    return;
-  }
-
-  // Print log header
+  // Print some logging
   switch (server_config->logging_type) {
   case no:
     break;
@@ -100,4 +85,28 @@ void listen_server(kind_server_config_t *server_config) {
 void interrupt_handler(int signal) {
   (void)signal;
   is_running = false;
+}
+
+int setup_server_socket(kind_server_config_t *server_config,
+                        struct sockaddr *address, socklen_t address_size) {
+  // Create the server TCP socket
+  int server_file_descriptor = socket(AF_INET, SOCK_STREAM, 0);
+  if (-1 == server_file_descriptor) {
+    (void)perror("Error creating the server socket");
+    return -1;
+  }
+
+  if (-1 == bind(server_file_descriptor, address, address_size)) {
+    (void)perror("Error binding the address to the server");
+    (void)close(server_file_descriptor);
+    return -1;
+  }
+
+  if (-1 == listen(server_file_descriptor, server_config->backlog)) {
+    (void)perror("Error initializing the server listener");
+    (void)close(server_file_descriptor);
+    return -1;
+  }
+
+  return server_file_descriptor;
 }
