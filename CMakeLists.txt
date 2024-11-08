@@ -25,7 +25,7 @@ set(PROJECT_VERSION
 message(STATUS "${PROJECT_NAME} version: ${PROJECT_VERSION}")
 
 # Setup library
-set(SOURCES src/kind.c)
+set(SOURCES src/listener.c)
 
 add_library(kindc STATIC ${SOURCES})
 

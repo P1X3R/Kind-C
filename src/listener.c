@@ -3,6 +3,7 @@
 #include <netinet/ip.h>
 #include <signal.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -24,7 +25,7 @@ int setup_server_socket(kind_server_config_t *server_config,
 // TODO: Make this multithread with a thread pool
 // TODO: Make this thread safe
 // TODO: Make well unit testing for this
-void listen_server(kind_server_config_t *server_config) {
+void listen_server(kind_server_config_t *server_config, uint16_t port) {
   // Setup signal action
   // If the kyeboard interrupts the program, instead of just close the program,
   // clean the data and then end the program
@@ -41,9 +42,9 @@ void listen_server(kind_server_config_t *server_config) {
 
   // Setup server address
   struct sockaddr_in address;
-  address.sin_family = AF_INET;                  // Setup TCP address
-  address.sin_port = htons(server_config->port); // Set the server port
-  address.sin_addr.s_addr = INADDR_ANY;          // Set address to 0.0.0.0
+  address.sin_family = AF_INET;         // Setup TCP address
+  address.sin_port = htons(port);       // Set the server port
+  address.sin_addr.s_addr = INADDR_ANY; // Set address to 0.0.0.0
   socklen_t address_size = sizeof(address);
 
   int server_file_descriptor = setup_server_socket(
@@ -54,12 +55,12 @@ void listen_server(kind_server_config_t *server_config) {
   case no:
     break;
   case basic:
-    (void)printf("Server running in port: %d\n", server_config->port);
+    (void)printf("Server running in port: %d\n", port);
     break;
   case colorful:
     (void)printf(ANSI_COLOR_MAGENTA "[Server]: ");
     (void)printf(ANSI_COLOR_GREEN "Running at port ");
-    (void)printf(ANSI_COLOR_BLUE "%d\n", server_config->port);
+    (void)printf(ANSI_COLOR_BLUE "%d\n", port);
     (void)printf(ANSI_COLOR_RESET);
     break;
   }
